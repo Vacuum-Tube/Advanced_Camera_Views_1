@@ -12,7 +12,7 @@ local function addPositions (data, views)  -- add Camera view(s) to existing one
 		end
 	end
 	----------------------------
-	local options = camViews.getOptions()
+	local options = tools.modParams("paramsACV")
 	if ((options.replaceExistingViews == 1) or (type(data.metadata.cameraConfig) ~= "table") or (type(data.metadata.cameraConfig.positions) ~= "table")) then
 		-- options.replaceExistingViews == 1	--> Vorhandene ersetzen
 		data.metadata.cameraConfig = {positions = {}}
@@ -101,18 +101,19 @@ local function createGroupsTable(data)
 	return result
 end
 
+
+local invalidModels = {
+	["res/models/model/vehicle/tram/usa/skoda_10t.mdl"] = true,  -- immediate freeze when adding camera views, unknown reason
+}
+
 -- addModifier "loadModel"
 return function (fileName, data)
-	local invalidModels = {
-		--["res/models/model/vehicle/tram/usa/skoda_10t.mdl"] = true,
-	}
-
 	if invalidModels[fileName] then
 		return data
 	end
 	
 	if data and data.metadata and data.boundingInfo and data.boundingInfo.bbMax and data.boundingInfo.bbMin then
-		local options = camViews.getOptions()
+		local options = tools.modParams("paramsACV")
 		local viewsParams = {
 			fileName = fileName,
 			data = data,
@@ -137,7 +138,6 @@ return function (fileName, data)
 			if data.metadata.transportVehicle.carrier=="TRAM" and data.metadata.railVehicle then  -- Tram vehicle
 				if data.metadata.railVehicle.engines then
 					addPositions(data, camViews.TramViews(xmax,ymax,zmax,xmin,ymin,zmin,viewsParams))
-					--commonapi.dmp({filename=filename,data.metadata.cameraConfig}) -- issue with skoda_10t
 				else
 					
 				end

@@ -14,7 +14,7 @@ local function viewRotTransl (rotZYX,translXYZ,foV)
 	}
 end
 
-local function defaultView(x, z, fov, params)  -- add default camera view because it's replaced
+local function defaultView(x, z, fov)  -- add default camera view because it's replaced
 	return viewRotTransl({0, 0, 0 }, {x, 0, z }, fov)
 end
 
@@ -24,18 +24,6 @@ local function fromTopView (z,rot)
 		rotZ=180
 	end
 	return viewRotTransl( {rotZ, 90, 0 }, {0, 0, z }, 60 )
-end
-
-camViews.getOptions = function()
-	return tools.modParams("paramsACV")
-end
-
-local function optionalViews(views, include)
-	if include==true then
-		return views
-	else
-		return {}
-	end
 end
 
 local function getParentsData(groupsTable, id)
@@ -75,7 +63,7 @@ local function addSeats(seatProvider, params)  -- add driver seat(s) and one pas
 	if seatProvider and seatProvider.seats then
 		local passSeatSet = false
 		local crewSeatSet = false
-		local options = camViews.getOptions()
+		local options = tools.modParams("paramsACV")
 		for _,seat in pairs(seatProvider.seats) do
 			if seat.crew==true then  -- crew
 				if (options.addCrewSeats == 1) then
@@ -103,8 +91,7 @@ end
 
 
 camViews.TrainViews = function (xmax, ymax, zmax, xmin, ymin, zmin, params) return {
-	--defaultView(xmax, 3),
-	defaultView(xmax, 3, nil, params),
+	defaultView(xmax, 3),
 	viewRotTransl( {-150,	0,	0	},	{xmax+12,	10,			2.5	},	50 ),
 	viewRotTransl( {150,	0,	0	},	{xmax+12,	-10,		2.5	},	50 ),
 	viewRotTransl( {0,		15,	0	},	{-100,		0,			25	},	50 ),
