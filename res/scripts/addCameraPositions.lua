@@ -1,7 +1,7 @@
 local camViews = require "AdvancedCameraViews"
 
-function addPositions (data, views)  -- add Camera view(s) to existing ones
-	if type(data.metadata.cameraConfig) ~= "table" then
+local function addPositions (data, views)  -- add Camera view(s) to existing ones
+	if type(data.metadata.cameraConfig) ~= "table" or type(data.metadata.cameraConfig.positions) ~= "table" then
 		data.metadata.cameraConfig = {positions = {}}
 	end
 	if views.transf then

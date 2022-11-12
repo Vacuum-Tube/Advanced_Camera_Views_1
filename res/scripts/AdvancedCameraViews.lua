@@ -1,7 +1,7 @@
 local transf = require "transf"
 local vec3 = require "vec3"
 
-function viewRotTransl (rotZYX,translXYZ,foV)
+local function viewRotTransl (rotZYX,translXYZ,foV)
 	return {
 		transf = transf.rotZYXTransl(
 			transf.degToRad( rotZYX[1], rotZYX[2], rotZYX[3] ),
@@ -11,11 +11,11 @@ function viewRotTransl (rotZYX,translXYZ,foV)
 	}
 end
 
-function defaultView (x,z,fov)  -- add default camera view because it's replaced
+local function defaultView (x,z,fov)  -- add default camera view because it's replaced
 	return viewRotTransl( {0, 0, 0 }, {x, 0, z }, fov )
 end
 
-function fromTopView (z,rot)
+local function fromTopView (z,rot)
 	local rotZ=0
 	if rot then
 		rotZ=180
@@ -23,13 +23,15 @@ function fromTopView (z,rot)
 	return viewRotTransl( {rotZ, 90, 0 }, {0, 0, z }, 60 )
 end
 
-function getOptions()
+local function getOptions()
 	if merk_modutil and merk_modutil[1] then
 		return merk_modutil[1].userSettings.get("Advanced_Camera_Views_1")
+	else
+		print("No merk_modutil !")
 	end
 end
 
-function optionalViews(views, include)
+local function optionalViews(views, include)
 	if include==true then
 		return views
 	else
@@ -37,17 +39,20 @@ function optionalViews(views, include)
 	end
 end
 
-function addSeat (seat,vectransl)  -- add one view by a seat with transl
+local function addSeat (seat,vectransl)  -- add one view by a seat with transl
 	local tran = transf.mul(seat.transf, transf.transl(vectransl))
 	return { group=seat.group, transf = tran }
 end
 
-function addSeats (seatProvider)  -- add driver seat(s) and one passenger seat
+local function addSeats (seatProvider)  -- add driver seat(s) and one passenger seat
 	local seats={}
 	if seatProvider and seatProvider.seats then
 		local passseatset=false
 		local crewseatset=false
 		local options = getOptions()
+		if not options.addCrewSeats then
+			print("AdvancedCameraViews: options=={}")
+		end
 		for _,seat in pairs(seatProvider.seats) do
 			if seat.crew==true then  -- crew
 				if options.addCrewSeats==true then
