@@ -101,6 +101,17 @@ local function createGroupsTable(data)
 	return result
 end
 
+local function isValidBoundingInfo(boundingInfo)
+	-- Sicherstellen, dass "boundingInfo" valid ist und das Modell 3-dimensionale Ausmaße hat.
+	if ((type(boundingInfo) == "table") and (type(boundingInfo.bbMax) == "table") and (type(boundingInfo.bbMin) == "table")) then
+		if ((boundingInfo.bbMax[1] - boundingInfo.bbMin[1] > 0) and (boundingInfo.bbMax[2] - boundingInfo.bbMin[2] > 0) and
+			(boundingInfo.bbMax[3] - boundingInfo.bbMin[3] > 0)) then
+			return true
+		end
+	end
+	return false
+end
+
 
 local invalidModels = {
 	["res/models/model/vehicle/tram/usa/skoda_10t.mdl"] = true,  -- immediate freeze when adding camera views, unknown reason
@@ -112,7 +123,7 @@ return function (fileName, data)
 		return data
 	end
 	
-	if data and data.metadata and data.boundingInfo and data.boundingInfo.bbMax and data.boundingInfo.bbMin then
+	if data and data.metadata and isValidBoundingInfo(data.boundingInfo) then
 		local options = tools.modParams("paramsACV")
 		local viewsParams = {
 			fileName = fileName,
