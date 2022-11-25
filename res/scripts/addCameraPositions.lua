@@ -29,7 +29,48 @@ local function addPositions (data, views)  -- add Camera view(s) to existing one
 	end
 end
 
-local function createGroupsTable(data)
+local deactivatableKeys = {
+	"backBackwardParts",
+	"backForwardParts",
+	"frontBackwardParts",
+	"frontForwardParts",
+	"innerBackwardParts",
+	"innerForwardParts",
+	"blinkingLights0",
+	"blinkingLights1",
+	"blinkLightsRight0",
+	"blinkLightsRight1",
+	"blinkLightsLeft0",
+	"blinkLightsLeft1",
+	"brakeLights",
+}
+
+-- fix some senseless definitions from some mods leading to errors
+local function repairConfigs(configs)
+	for i = 1, #configs do
+		--	handling deactivatableKeys (no zero entrys)
+		for j, deactivatableKey in ipairs(deactivatableKeys) do
+			local newKeys = {}
+			for k, id in ipairs(tools.getValue(configs[i][deactivatableKey], {})) do
+				if (id > 0) then
+					table.insert(newKeys, id)
+				end
+			end
+			configs[i][deactivatableKey] = newKeys
+		end
+		--	handling fakeBogies
+		local newFakeBogies = {}
+		local countAxles = #tools.getValue(configs[i].axles, {})
+		for j, bogie in ipairs(tools.getValue(configs[i].fakeBogies, {})) do
+			if ((bogie.group > 0) or ((bogie.group == 0) and (countAxles == 0))) then
+				table.insert(newFakeBogies, bogie)
+			end
+		end
+		configs[i].fakeBogies = newFakeBogies
+	end
+end
+
+local function createGroupsTable(fileName, data)
 	local function handleGroup(result, params)
 		local copyKeys = {
 			"materials",
@@ -80,16 +121,7 @@ local function createGroupsTable(data)
 		--	Handling deactivatable groups
 		if ((type(data.metadata.railVehicle) == "table") and (type(data.metadata.railVehicle.configs) == "table") and
 			(type(data.metadata.railVehicle.configs[1]) == "table")) then
-			
-			local deactivatableKeys = {
-				"backBackwardParts",
-				"backForwardParts",
-				"frontBackwardParts",
-				"frontForwardParts",
-				"innerBackwardParts",
-				"innerForwardParts"
-			}
-			
+			repairConfigs(data.metadata.railVehicle.configs)
 			for i, deactivatableKey in ipairs(deactivatableKeys) do
 				for j, id in ipairs(tools.getValue(data.metadata.railVehicle.configs[1][deactivatableKey], {})) do
 					result.deactivatableIds[id] = true
@@ -114,7 +146,7 @@ end
 
 
 local invalidModels = {
-	["res/models/model/vehicle/tram/usa/skoda_10t.mdl"] = true,  -- immediate freeze when adding camera views, unknown reason
+	-- ["res/models/model/vehicle/tram/usa/skoda_10t.mdl"] = true,  -- solved with repairConfigs
 }
 
 -- addModifier "loadModel"
@@ -128,7 +160,7 @@ return function (fileName, data)
 		local viewsParams = {
 			fileName = fileName,
 			data = data,
-			groupsTable = createGroupsTable(data),
+			groupsTable = createGroupsTable(fileName, data),
 		}
 		
 		local xmax=data.boundingInfo.bbMax[1]

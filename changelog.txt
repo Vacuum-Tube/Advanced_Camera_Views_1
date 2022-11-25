@@ -1,3 +1,6 @@
+2022-11-25: v1.7
+- Fix Freezes caused by senseless metadata.railVehicle.configs definitions from some mods and the vanilla skoda tram (thanks to @EAT1963)
+
 2022-11-17: v1.6
 - enhanced checking of boundingBox definiton
 
