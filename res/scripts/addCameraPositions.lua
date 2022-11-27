@@ -62,7 +62,8 @@ local function repairConfigs(configs)
 		local newFakeBogies = {}
 		local countAxles = #tools.getValue(configs[i].axles, {})
 		for j, bogie in ipairs(tools.getValue(configs[i].fakeBogies, {})) do
-			if ((bogie.group > 0) or ((bogie.group == 0) and (countAxles == 0))) then
+			local bogieGroup = tools.getValue(bogie.group, -1)
+			if ((bogieGroup > 0) or ((bogieGroup == 0) and (countAxles == 0))) then
 				table.insert(newFakeBogies, bogie)
 			end
 		end
@@ -121,7 +122,9 @@ local function createGroupsTable(fileName, data)
 		--	Handling deactivatable groups
 		if ((type(data.metadata.railVehicle) == "table") and (type(data.metadata.railVehicle.configs) == "table") and
 			(type(data.metadata.railVehicle.configs[1]) == "table")) then
+			
 			repairConfigs(data.metadata.railVehicle.configs)
+			
 			for i, deactivatableKey in ipairs(deactivatableKeys) do
 				for j, id in ipairs(tools.getValue(data.metadata.railVehicle.configs[1][deactivatableKey], {})) do
 					result.deactivatableIds[id] = true
