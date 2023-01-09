@@ -64,7 +64,7 @@ function data()
 		info = {
 			name = _("name"),
 			description = _("desc"),
-			minorVersion = 8,
+			minorVersion = 9,
 			severityAdd = "NONE",
 			severityRemove = "NONE",
 			tfnetId = 5224,

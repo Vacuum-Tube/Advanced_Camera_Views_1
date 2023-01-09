@@ -45,8 +45,14 @@ local deactivatableKeys = {
 	"brakeLights",
 }
 
+local function checkFakeBogie(bogie, countAxles)
+	local group = tools.getValue(bogie.group, -1)
+	local sum = tools.getValue(bogie.offset, 0) ~= 0 or tools.getValue(bogie.position, 0) ~= 0
+	return group > 0 or (group == 0 and (sum == true or (sum == false and countAxles == 0)))
+end
+
 -- fix some senseless definitions from some mods leading to errors
-local function repairConfigs(configs)
+local function repairConfigs(configs, fileName)
 	for i = 1, #configs do
 		--	handling deactivatableKeys (no zero entrys)
 		for j, deactivatableKey in ipairs(deactivatableKeys) do
@@ -54,17 +60,19 @@ local function repairConfigs(configs)
 			for k, id in ipairs(tools.getValue(configs[i][deactivatableKey], {})) do
 				if (id > 0) then
 					table.insert(newKeys, id)
+				else
+					print(string.format("Advanced Camera Views - Delete 0 entry in 'configs[%d].%s' [%s].", i, deactivatableKey, fileName))
 				end
 			end
 			configs[i][deactivatableKey] = newKeys
 		end
 		--	handling fakeBogies
 		local newFakeBogies = {}
-		local countAxles = #tools.getValue(configs[i].axles, {})
 		for j, bogie in ipairs(tools.getValue(configs[i].fakeBogies, {})) do
-			local bogieGroup = tools.getValue(bogie.group, -1)
-			if ((bogieGroup > 0) or ((bogieGroup == 0) and (countAxles == 0))) then
+			if checkFakeBogie(bogie, #tools.getValue(configs[i].axles, {})) then
 				table.insert(newFakeBogies, bogie)
+			else
+				print(string.format("Advanced Camera Views - Delete invalid fakeBogie: 'configs[%d].fakeBogies[%d].' [%s]", i, j, fileName))
 			end
 		end
 		configs[i].fakeBogies = newFakeBogies
@@ -123,7 +131,7 @@ local function createGroupsTable(fileName, data)
 		if ((type(data.metadata.railVehicle) == "table") and (type(data.metadata.railVehicle.configs) == "table") and
 			(type(data.metadata.railVehicle.configs[1]) == "table")) then
 			
-			repairConfigs(data.metadata.railVehicle.configs)
+			repairConfigs(data.metadata.railVehicle.configs, fileName)
 			
 			for i, deactivatableKey in ipairs(deactivatableKeys) do
 				for j, id in ipairs(tools.getValue(data.metadata.railVehicle.configs[1][deactivatableKey], {})) do
@@ -154,9 +162,9 @@ local invalidModels = {
 
 -- addModifier "loadModel"
 return function (fileName, data)
-	if invalidModels[fileName] then
-		return data
-	end
+	-- if invalidModels[fileName] then
+		-- return data
+	-- end
 	
 	if data and data.metadata and isValidBoundingInfo(data.boundingInfo) then
 		local options = tools.modParams("paramsACV")

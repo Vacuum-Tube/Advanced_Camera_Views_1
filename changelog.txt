@@ -1,3 +1,6 @@
+2023-01-09: v1.9
+- Fix Bug in configs/fakeBogies repair script, add log info
+
 2022-11-27: v1.8
 - Fix for mods with incomplete fakeBogies definition
 
